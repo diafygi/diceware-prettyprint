@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="files/dice.css">
+        <style>
+            .description { max-width: 40em; }
+            .page-title { text-align: right; }
+            .page-break { page-break-after: always; }
+            .column { width: 16.66667%; float: left; }
+            .word { line-height: 1.2em; display: block; }
+            .indent-left { margin-left: 2em; }
+            .thumb { display: inline-block; border: 1px solid blue; }
+            .footer { font-size: 0.75em; margin-top: 3em; }
+            @media print{.no-print { display: none; }}
+        </style>
+    </head>
+    <body>
+        <div id="homepage">
+            <h1>Printer-Friendly Diceware</h1>
+            <p class="description">
+                This page converts a
+                <a href="https://en.wikipedia.org/wiki/Diceware"
+                   target="_blank"
+                   rel="noopener noreferrer">Diceware</a>
+                word list into pages with images of dice that can be easily printed.
+                Simply select your word list file and this page will render into
+                36 pages that can be easily printed (with page breaks for each
+                page).
+            </p>
+            <p>
+                Generate printout from word list: <input id="import" type="file">
+            </p>
+            <h3>FAQ</h3>
+            <p>
+                Can I just download a ready-made pdf?
+            </p>
+            <p class="indent-left">
+                <a href="files/eff_diceware.pdf"
+                   target="_blank"
+                   rel="noopener noreferrer">eff_diceware.pdf</a>
+                (made from the EFF word list)
+            </p>
+            <p>
+                What to do the generated printouts look like?
+            </p>
+            <p class="indent-left">
+                <a href="files/printout_screenshot.png"
+                   class="thumb"
+                   target="_blank"
+                   rel="noopener noreferrer"><img src="files/printout_screenshot_thumb.png"></a>
+                </a>
+            </p>
+
+            <p>
+                What word list should I use?
+            </p>
+            <p class="indent-left">
+                <a href="https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt"
+                   target="_blank"
+                   rel="noopener noreferrer">eff_large_wordlist.txt</a>
+                (easy-to-remember, <a href="https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases"
+                   target="_blank"
+                   rel="noopener noreferrer">read more</a>)<br>
+                <a href="http://world.std.com/~reinhold/diceware.html"
+                   target="_blank"
+                   rel="noopener noreferrer">more...</a>
+                (includes other languages)<br>
+            </p>
+            <p>
+                What format should the word list .txt be in?
+            </p>
+<pre class="indent-left">
+11111	abacus
+11112	abdomen
+11113	abdominal
+11114	abide
+11115	abiding
+...
+</pre>
+            <p>
+                What print settings should I use?
+            </p>
+            <p class="indent-left">
+                (1) Landscape mode; (2) Turn on background images; (3) Scale as needed (I have to zoom to ~75%)
+            </p>
+            <div class="footer">
+
+                This website is static, so it can be saved and loaded locally. Just right-click and "Save Page As.."!<br>
+                Released under MIT license |
+                Source code:
+                    <a href="https://github.com/diafygi/diceware-prettyprint"
+                       target="_blank"
+                       rel="noopener noreferrer">https://github.com/diafygi/diceware-prettyprint</a>
+            </div>
+
+        </div>
+
+        <div id="render" style="display:none;"></div>
+        <script id="template" type="text/x-dot-template">
+            <p class="no-print">
+                <a href="#" id="print">Print</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="#" id="back">go back</a>
+            </p>
+            {{~ it.pages :page }}
+                <div class="page-break">
+                    <h1 class="page-title">
+                        First Two Dice:
+                        {{~ page.first_two :d }}
+                            <span class="dice dice-{{=d}}" title="{{=d}}"></span>
+                        {{~}}
+                    </h1>
+                    <div>
+                        {{~ page.columns :column }}
+                            <div class="column">
+                                <p>
+                                    <b>First Three Dice:</b><br>
+                                    {{~ column.first_three :d }}
+                                        <span class="dice dice-{{=d}}" title="{{=d}}"></span>
+                                    {{~}}
+                                </p>
+                                {{~ column.sections :section }}
+                                    <p>
+                                        {{~ section :word }}
+                                            <span class="word">
+                                                {{~ word.all_five :d }}
+                                                    <span class="dice dice-{{=d}}" title="{{=d}}"></span>
+                                                {{~}}
+                                                &nbsp;&nbsp;{{=word.word}}
+                                            </span>
+                                        {{~}}
+                                    </p>
+                                {{~}}
+                            </div>
+                        {{~}}
+                    </div>
+                </div>
+            {{~}}
+        </script>
+        <script src="files/doT.min.js"></script>
+        <script>
+
+            // render settings
+            var COLUMNS_PER_PAGE = 6;
+            var SECTIONS_PER_COLUMN = 6;
+            var WORDS_PER_SECTION = 6;
+            var wordlistRegex = new RegExp("^([0-9])([0-9])([0-9])([0-9])([0-9])\\s(.+)$");
+
+            /*
+            Template context data = {
+                pages: [
+                    {
+                        "first_two": [3,4],
+                        "columns": [
+                            {
+                                "first_three": [3,4,2],
+                                "sections": [
+                                    [{"all_five": [3,4,2,1,1], "word": "able"}, ...5 more],
+                                    [{"all_five": [3,4,2,2,1], "word": "blue"}, ...5 more],
+                                    [{"all_five": [3,4,2,3,1], "word": "rider"}, ...5 more],
+                                    [{"all_five": [3,4,2,4,1], "word": "opinion"}, ...5 more],
+                                    [{"all_five": [3,4,2,5,1], "word": "nine"}, ...5 more],
+                                    [{"all_five": [3,4,2,6,1], "word": "web"}, ...5 more],
+                                ],
+                            },
+                            ...5 more
+                        ],
+                    },
+                    ...35 more
+                ],
+            };
+             */
+
+            // render the word list
+            function renderPrintout(data){
+
+                // render pages and hide homepage
+                var renderfn = doT.template(document.getElementById('template').text);
+                document.getElementById('render').innerHTML = renderfn(data);
+                document.getElementById('render').style.display = "block";
+                document.getElementById('homepage').style.display = "none";
+
+                // print listener
+                document.getElementById('print').addEventListener("click", function(e){
+                    e.preventDefault();
+                    window.print();
+                });
+
+                // go back listener
+                document.getElementById('back').addEventListener("click", function(e){
+                    e.preventDefault();
+                    document.getElementById('render').innerHTML = "";
+                    document.getElementById('render').style.display = "none";
+                    document.getElementById('homepage').style.display = "block";
+                });
+            }
+
+            // import a word list from a local file
+            function handleFileSelect(e) {
+                for(var i = 0; i < e.target.files.length; i++){
+                    var file = e.target.files[i];
+                    var reader = new FileReader();
+                    reader.onload = function(progressEvent){
+                        var lines = this.result.split('\n');
+                        var pages = [];
+                        for(var l = 0; l < lines.length; l++){
+
+                            // match required word list line format
+                            lineSplit = wordlistRegex.exec(lines[l]);
+                            if(lineSplit){
+
+                                // parse word file into dice readings and word
+                                var d1 = lineSplit[1];
+                                var d2 = lineSplit[2];
+                                var d3 = lineSplit[3];
+                                var d4 = lineSplit[4];
+                                var d5 = lineSplit[5];
+                                var newWord = {
+                                    "all_five": [d1, d2, d3, d4, d5],
+                                    "word": lineSplit[6],
+                                };
+                                var newColumn = {
+                                    "first_three": [d1, d2, d3],
+                                    "sections": [
+                                        [newWord],
+                                    ],
+                                };
+                                var newPage = {
+                                    "first_two": [d1, d2],
+                                    "columns": [newColumn],
+                                };
+
+                                // no pages
+                                if(pages.length === 0){
+                                    pages.push(newPage)
+                                    continue;
+                                }
+
+                                // get latest page, column, and section
+                                var lastPage = pages[pages.length - 1];
+                                var lastColumn = lastPage['columns'][lastPage['columns'].length - 1];
+                                var lastSection = lastColumn['sections'][lastColumn['sections'].length - 1];
+
+                                // new page
+                                if(lastPage['columns'].length === COLUMNS_PER_PAGE && lastColumn['sections'].length === SECTIONS_PER_COLUMN && lastSection.length === WORDS_PER_SECTION){
+                                    pages.push(newPage)
+                                    continue;
+                                }
+
+                                // new column
+                                if(lastColumn['sections'].length === SECTIONS_PER_COLUMN && lastSection.length === WORDS_PER_SECTION){
+                                    lastPage['columns'].push(newColumn)
+                                    continue;
+                                }
+
+                                // new section
+                                if(lastSection.length === WORDS_PER_SECTION){
+                                    lastColumn['sections'].push([newWord])
+                                    continue;
+                                }
+
+                                // new word
+                                lastSection.push(newWord)
+                            }
+                        }
+                        renderPrintout({"pages": pages});
+                    };
+                    reader.readAsText(file);
+                }
+            }
+            document.getElementById('import').addEventListener('change', handleFileSelect);
+        </script>
+    </body>
+</html>
