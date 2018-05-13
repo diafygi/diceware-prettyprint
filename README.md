@@ -21,9 +21,9 @@ mom, and she had no problem figuring out where to go lookup the word from her
 dice roll.
 
 This project is "unhosted", which means it does everything client-side
-(javascript renders the pages and the dice icons are in css), an no central
+(javascript renders the pages and the dice icons are in css) and no central
 server is needed. If you want to run a local copy of this website, simply
-right-click and "Save As"!
+right-click and "Save Page As"!
 
 ## What is Diceware?
 
