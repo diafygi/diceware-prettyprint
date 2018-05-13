@@ -4,7 +4,7 @@ Website: https://diafygi.github.io/diceware-prettyprint/
 
 <img src="files/diceware_printout_photo.jpg" title="Photo of example printout" width="300">
 
-[Download example printout [pdf]](files/eff_wordlist.pdf)
+[Download example printout [pdf]](files/eff_diceware.pdf)
 
 ## What does this project do?
 
